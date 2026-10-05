@@ -1808,6 +1808,7 @@ ST_FUNC void preprocess(int is_bof)
  redo:
     switch(tok) {
     case TOK_DEFINE:
+	case TOK_DEFINE_CN:
         pp_debug_tok = tok;
         next_nomacro();
         pp_debug_symv = tok;
@@ -1824,6 +1825,7 @@ ST_FUNC void preprocess(int is_bof)
         next_nomacro();
         break;
     case TOK_INCLUDE:
+	case TOK_INCLUDE_CN:
     case TOK_INCLUDE_NEXT:
         parse_include(s1, tok - TOK_INCLUDE, 0);
         goto the_end;
