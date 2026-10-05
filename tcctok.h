@@ -78,7 +78,7 @@
      DEF(TOK_STRUCT, "struct")
      DEF(TOK_STRUCT_CN, "结构")
      DEF(TOK_UNION, "union")
-     DEF(TOK_UNION, "联合")
+     DEF(TOK_UNION_CN, "联合")
      DEF(TOK_TYPEDEF, "typedef")
      DEF(TOK_TYPEDEF_CN, "类型定义")
      DEF(TOK_ENUM, "enum")
