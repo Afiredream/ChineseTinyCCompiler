@@ -82,7 +82,7 @@
      DEF(TOK_TYPEDEF, "typedef")
      DEF(TOK_TYPEDEF_CN, "类型定义")
      DEF(TOK_ENUM, "enum")
-     DEF(TOK_ENU_CN, "枚举")
+     DEF(TOK_ENUM_CN, "枚举")
      DEF(TOK_SIZEOF, "sizeof")
      DEF(TOK_ATTRIBUTE1, "__attribute")
      DEF(TOK_ATTRIBUTE2, "__attribute__")
