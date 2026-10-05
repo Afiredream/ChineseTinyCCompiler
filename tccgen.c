@@ -4771,6 +4771,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
 
             /* basic types */
         case TOK_CHAR:
+        case TOK_CHAR_CN:
             u = VT_BYTE;
         basic_type:
             next();
@@ -4791,12 +4792,15 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
             typespec_found = 1;
             break;
         case TOK_VOID:
+        case TOK_VOID_CN:
             u = VT_VOID;
             goto basic_type;
         case TOK_SHORT:
+        case TOK_SHORT_CN:
             u = VT_SHORT;
             goto basic_type;
         case TOK_INT:
+        case TOK_INT_CN:
             u = VT_INT;
             goto basic_type;
         case TOK_ALIGNAS:
@@ -4821,6 +4825,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
             }
             continue;
         case TOK_LONG:
+        case TOK_LONG_CN:
             if ((t & VT_BTYPE) == VT_DOUBLE) {
                 t = (t & ~(VT_BTYPE|VT_LONG)) | VT_LDOUBLE;
             } else if ((t & (VT_BTYPE|VT_LONG)) == VT_LONG) {
@@ -4832,14 +4837,18 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
             next();
             break;
         case TOK_BOOL:
+        case TOK_BOOL_CN:
             u = VT_BOOL;
             goto basic_type;
         case TOK_COMPLEX:
+        case TOK_COMPLEX_CN:
             tcc_error("_Complex is not yet supported");
         case TOK_FLOAT:
+        case TOK_FLOAT_CN:
             u = VT_FLOAT;
             goto basic_type;
         case TOK_DOUBLE:
+        case TOK_DOUBLE_CN:
             if ((t & (VT_BTYPE|VT_LONG)) == VT_LONG) {
                 t = (t & ~(VT_BTYPE|VT_LONG)) | VT_LDOUBLE;
             } else {
@@ -4849,15 +4858,18 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
             next();
             break;
         case TOK_ENUM:
+        case TOK_ENUM_CN:
             struct_decl(&type1, VT_ENUM);
         basic_type2:
             u = type1.t;
             type->ref = type1.ref;
             goto basic_type1;
         case TOK_STRUCT:
+        case TOK_STRUCT_CN:
             struct_decl(&type1, VT_STRUCT);
             goto basic_type2;
         case TOK_UNION:
+        case TOK_UNION_CN:
             struct_decl(&type1, VT_UNION);
             goto basic_type2;
 
