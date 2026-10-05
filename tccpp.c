@@ -1825,14 +1825,15 @@ ST_FUNC void preprocess(int is_bof)
         next_nomacro();
         break;
     case TOK_INCLUDE:
-	case TOK_INCLUDE_CN:
     case TOK_INCLUDE_NEXT:
+	case TOK_INCLUDE_CN:
         parse_include(s1, tok - TOK_INCLUDE, 0);
         goto the_end;
     case TOK_IFNDEF:
         c = 1;
         goto do_ifdef;
     case TOK_IF:
+	case TOK_IF_CN:
         c = expr_preprocess(s1);
         goto do_if;
     case TOK_IFDEF:
@@ -1860,6 +1861,7 @@ ST_FUNC void preprocess(int is_bof)
         *s1->ifdef_stack_ptr++ = c;
         goto test_skip;
     case TOK_ELSE:
+    case TOK_ELSE_CN:
         next_nomacro();
         if (s1->ifdef_stack_ptr == s1->ifdef_stack)
             tcc_error("#else without matching #if");
