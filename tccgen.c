@@ -7269,14 +7269,14 @@ again:
     if (debug_modes)
         tcc_tcov_check_line (tcc_state, 0), tcc_tcov_block_begin (tcc_state);
 
-    if (t == TOK_IF) {
+    if (t == TOK_IF || t == TOK_IF_CN) {
         new_scope_s(&o);
         skip('(');
         gexpr_decl();
         a = gvtst(1, 0);
         skip(')');
         block(0);
-        if (tok == TOK_ELSE) {
+        if (tok == TOK_ELSE || t == TOK_ELSE_CN) {
             d = gjmp(0);
             gsym(a);
             next();
@@ -7415,13 +7415,16 @@ again:
         gsym(a);
         prev_scope(&o, 0);
 
-    } else if (t == TOK_DO) {
+    } else if (t == TOK_DO || t == TOK_DO_CN) {
         new_scope_s(&o);
         a = b = 0;
         d = gind();
         lblock(&a, &b);
         gsym(b);
-        skip(TOK_WHILE);
+        switch(t) {
+            case TOK_DO:skip(TOK_WHILE);break;
+            case TOK_DO_CN:skip(TOK_WHILE_CN);break;
+        }
         skip('(');
 	gexpr();
         c = gvtst(0, 0);
@@ -7430,22 +7433,6 @@ again:
 	gsym_addr(c, d);
         gsym(a);
         prev_scope_s(&o);
-    } else if (t == TOK_DO_CN) {
-        new_scope_s(&o);
-        a = b = 0;
-        d = gind();
-        lblock(&a, &b);
-        gsym(b);
-        skip(TOK_WHILE_CN);
-        skip('(');
-	gexpr();
-        c = gvtst(0, 0);
-        skip(')');
-        skip(';');
-	gsym_addr(c, d);
-        gsym(a);
-        prev_scope_s(&o);
-
     } else if (t == TOK_SWITCH || t == TOK_SWITCH_CN) {
         struct switch_t *sw;
 
