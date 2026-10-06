@@ -3945,7 +3945,7 @@ static void parse_attribute(AttributeDef *ad)
     AttributeDef ad_tmp;
     
 redo:
-    if (tok != TOK_ATTRIBUTE1 && tok != TOK_ATTRIBUTE2)
+    if (tok != TOK_ATTRIBUTE1 && tok != TOK_ATTRIBUTE2 && tok != TOK_ATTRIBUTE_CN)
         return;
     if (NULL == ad) /* skip over / ignore attributes */
         ad = &ad_tmp;
@@ -4059,6 +4059,7 @@ redo:
         case TOK_CONST1:
         case TOK_CONST2:
         case TOK_CONST3:
+        case TOK_CONST_CN:
         case TOK_PURE1:
         case TOK_PURE2:
 	    /* ignored */
@@ -4610,7 +4611,7 @@ do_decl:
             flexible = 0;
             while (tok != '}') {
                 if (!parse_btype(&btype, &ad1, 0)) {
-                    if (tok == TOK_STATIC_ASSERT) {
+                    if (tok == TOK_STATIC_ASSERT || tok == TOK_STATIC_ASSERT_CN) {
                         do_Static_assert();
                         continue;
                     }
@@ -4891,6 +4892,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
         case TOK_CONST1:
         case TOK_CONST2:
         case TOK_CONST3:
+        case TOK_CONST_CN:
             type->t = t;
             parse_btype_qualify(type, VT_CONSTANT);
             t = type->t;
@@ -4899,6 +4901,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
         case TOK_VOLATILE1:
         case TOK_VOLATILE2:
         case TOK_VOLATILE3:
+        case TOK_VOLATILE_CN:
             type->t = t;
             parse_btype_qualify(type, VT_VOLATILE);
             t = type->t;
@@ -4907,6 +4910,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
         case TOK_SIGNED1:
         case TOK_SIGNED2:
         case TOK_SIGNED3:
+        case TOK_SIGNED_CN:
             if ((t & (VT_DEFSIGN|VT_UNSIGNED)) == (VT_DEFSIGN|VT_UNSIGNED))
                 tcc_error("signed and unsigned modifier");
             t |= VT_DEFSIGN;
@@ -4916,11 +4920,14 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
         case TOK_RESTRICT1:
         case TOK_RESTRICT2:
         case TOK_RESTRICT3:
+        case TOK_RESTRICT_CN:
             t |= VT_RESTRICT;
             next();
             break;
         case TOK_REGISTER:
+        case TOK_REGISTER_CN:
         case TOK_AUTO:
+        case TOK_AUTO_CN:
             next();
             break;
         case TOK_UNSIGNED:
@@ -4933,12 +4940,15 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
 
             /* storage */
         case TOK_EXTERN:
+        case TOK_EXTERN_CN:
             g = VT_EXTERN;
             goto storage;
         case TOK_STATIC:
+        case TOK_STATIC_CN:
             g = VT_STATIC;
             goto storage;
         case TOK_TYPEDEF:
+        case TOK_TYPEDEF_CN:
             g = VT_TYPEDEF;
             goto storage;
        storage:
@@ -4950,6 +4960,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
         case TOK_INLINE1:
         case TOK_INLINE2:
         case TOK_INLINE3:
+        case TOK_INLINE_CN:
             t |= VT_INLINE;
             next();
             break;
@@ -4960,6 +4971,7 @@ static int parse_btype(CType *type, AttributeDef *ad, int ignore_label)
             /* GNUC attribute */
         case TOK_ATTRIBUTE1:
         case TOK_ATTRIBUTE2:
+        case TOK_ATTRIBUTE_CN:
             parse_attribute(ad);
             if (ad->attr_mode) {
                 u = ad->attr_mode -1;
@@ -5188,19 +5200,20 @@ static int post_type(CType *type, AttributeDef *ad, int storage, int td)
 	       in parameter decls.  The '*' as well, and then even only
 	       in prototypes (not function defs).  */
 	    switch (tok) {
-	    case TOK_CONST1: case TOK_CONST2: case TOK_CONST3:
+	    case TOK_CONST1: case TOK_CONST2: case TOK_CONST3: case TOK_CONST_CN
 		array_qualifiers |= VT_CONSTANT;
 		next();
 		continue;
-	    case TOK_VOLATILE1: case TOK_VOLATILE2: case TOK_VOLATILE3:
+	    case TOK_VOLATILE1: case TOK_VOLATILE2: case TOK_VOLATILE3: case TOK_VOLATILE_CN
 		array_qualifiers |= VT_VOLATILE;
 		next();
 		continue;
-	    case TOK_RESTRICT1: case TOK_RESTRICT2: case TOK_RESTRICT3:
+	    case TOK_RESTRICT1: case TOK_RESTRICT2: case TOK_RESTRICT3: case TOK_RESTRICT_CN:
 		array_qualifiers |= VT_RESTRICT;
 		next();
 		continue;
 	    case TOK_STATIC:
+        case TOK_STATIC_CN:
 	    case '*':
 		next();
 		continue;
@@ -5325,16 +5338,19 @@ static CType *type_decl(CType *type, AttributeDef *ad, int *v, int td)
         case TOK_CONST1:
         case TOK_CONST2:
         case TOK_CONST3:
+        case TOK_CONST_CN:
             qualifiers |= VT_CONSTANT;
             goto redo;
         case TOK_VOLATILE1:
         case TOK_VOLATILE2:
         case TOK_VOLATILE3:
+        case TOK_VOLATILE_CN:
             qualifiers |= VT_VOLATILE;
             goto redo;
         case TOK_RESTRICT1:
         case TOK_RESTRICT2:
         case TOK_RESTRICT3:
+        case TOK_RESTRICT_CN:
             qualifiers |= VT_RESTRICT;
             goto redo;
 	/* XXX: clarify attribute handling */
@@ -5848,6 +5864,7 @@ ST_FUNC void unary(void)
 	}
         break;
     case TOK_SIZEOF:
+    case TOK_SIZEOF_CN:
     case TOK_ALIGNOF1:
     case TOK_ALIGNOF2:
     case TOK_ALIGNOF3:
@@ -5856,7 +5873,7 @@ ST_FUNC void unary(void)
         if (tok == '(')
             tok = TOK_SOTYPE;
         expr_type(&type, unary);
-        if (t == TOK_SIZEOF) {
+        if (t == TOK_SIZEOF || t == TOK_SIZEOF_CN) {
             vpush_type_size(&type, &align);
             gen_cast_s(VT_SIZE_T);
         } else {
@@ -6102,6 +6119,7 @@ ST_FUNC void unary(void)
         break;
 
     case TOK_GENERIC:
+    case TOK_GENERIC_CN:
     {
 	CType controlling_type;
 	int has_default = 0;
@@ -6121,7 +6139,7 @@ ST_FUNC void unary(void)
         for (;;) {
 	    learn = 0;
 	    skip(',');
-	    if (tok == TOK_DEFAULT) {
+	    if (tok == TOK_DEFAULT || tok == TOK_DEFAULT_CN) {
 		if (has_default)
 		    tcc_error("too many 'default'");
 		has_default = 1;
@@ -7269,7 +7287,7 @@ again:
         }
         prev_scope_s(&o);
 
-    } else if (t == TOK_WHILE) {
+    } else if (t == TOK_WHILE || t == TOK_WHILE_CN) {
         new_scope_s(&o);
         d = gind();
         skip('(');
@@ -7289,7 +7307,7 @@ again:
         new_scope(&o);
 
         /* handle local labels declarations */
-        while (tok == TOK_LABEL) {
+        while (tok == TOK_LABEL || tok == TOK_LABEL_CN) {
             do {
                 next();
                 if (tok < TOK_UIDENT)
@@ -7315,7 +7333,7 @@ again:
         else if (!nocode_wanted)
             check_func_return();
 
-    } else if (t == TOK_RETURN) {
+    } else if (t == TOK_RETURN || t == TOK_RETURN_CN) {
         b = (func_vt.t & VT_BTYPE) != VT_VOID;
         if (tok != ';') {
             gexpr();
@@ -7343,7 +7361,7 @@ again:
 	    tcc_tcov_block_end (tcc_state, -1);
         CODE_OFF();
 
-    } else if (t == TOK_BREAK) {
+    } else if (t == TOK_BREAK || t == TOK_BREAK_CN) {
         /* compute jump */
         if (!cur_scope->bsym)
             tcc_error("cannot break");
@@ -7354,7 +7372,7 @@ again:
         *cur_scope->bsym = gjmp(*cur_scope->bsym);
         skip(';');
 
-    } else if (t == TOK_CONTINUE) {
+    } else if (t == TOK_CONTINUE || t == TOK_CONTINUE_CN) {
         /* compute jump */
         if (!cur_scope->csym)
             tcc_error("cannot continue");
@@ -7362,7 +7380,7 @@ again:
         *cur_scope->csym = gjmp(*cur_scope->csym);
         skip(';');
 
-    } else if (t == TOK_FOR) {
+    } else if (t == TOK_FOR || t == TOK_FOR_CN) {
         new_scope(&o);
 
         skip('(');
@@ -7397,13 +7415,14 @@ again:
         gsym(a);
         prev_scope(&o, 0);
 
-    } else if (t == TOK_DO) {
+    } else if (t == TOK_DO || t == TOK_DO_CN) {
         new_scope_s(&o);
         a = b = 0;
         d = gind();
         lblock(&a, &b);
         gsym(b);
         skip(TOK_WHILE);
+        skip(TOK_WHILE_CN);
         skip('(');
 	gexpr();
         c = gvtst(0, 0);
@@ -7413,7 +7432,7 @@ again:
         gsym(a);
         prev_scope_s(&o);
 
-    } else if (t == TOK_SWITCH) {
+    } else if (t == TOK_SWITCH || t == TOK_SWITCH_CN) {
         struct switch_t *sw;
 
         sw = tcc_mallocz(sizeof *sw);
@@ -7454,7 +7473,7 @@ again:
         gsym(a);
         end_switch();
 
-    } else if (t == TOK_CASE) {
+    } else if (t == TOK_CASE || t == TOK_CASE_CN) {
         struct case_t *cr;
         if (!cur_switch)
             expect("switch");
@@ -7475,7 +7494,7 @@ again:
         skip(':');
         goto block_after_label;
 
-    } else if (t == TOK_DEFAULT) {
+    } else if (t == TOK_DEFAULT || t == TOK_DEFAULT_CN) {
         if (!cur_switch)
             expect("switch");
         if (cur_switch->def_sym)
@@ -7484,7 +7503,7 @@ again:
         skip(':');
         goto block_after_label;
 
-    } else if (t == TOK_GOTO) {
+    } else if (t == TOK_GOTO || t == TOK_GOTO_CN) {
         vla_restore(cur_scope->vla.locorig);
         if (tok == '*' && gnu_ext) {
             /* computed goto */
@@ -7522,7 +7541,7 @@ again:
         }
         skip(';');
 
-    } else if (t == TOK_ASM1 || t == TOK_ASM2 || t == TOK_ASM3) {
+    } else if (t == TOK_ASM1 || t == TOK_ASM2 || t == TOK_ASM3 || t == TOK_ASM_CN) {
         asm_instr();
 
     } else {
@@ -8823,13 +8842,13 @@ static int decl(int l)
                 next();
                 continue;
             }
-            if (tok == TOK_STATIC_ASSERT) {
+            if (tok == TOK_STATIC_ASSERT || tok == TOK_STATIC_ASSERT_CN) {
                 do_Static_assert();
                 continue;
             }
             if (l != VT_CONST)
                 break;
-            if (tok == TOK_ASM1 || tok == TOK_ASM2 || tok == TOK_ASM3) {
+            if (tok == TOK_ASM1 || tok == TOK_ASM2 || tok == TOK_ASM3 || tok == TOK_ASM_CN) {
                 /* global asm block */
                 asm_global_instr();
                 continue;
@@ -8892,7 +8911,7 @@ static int decl(int l)
                 tcc_warning("type defaults to int");
             }
 
-            if (gnu_ext && (tok == TOK_ASM1 || tok == TOK_ASM2 || tok == TOK_ASM3)) {
+            if (gnu_ext && (tok == TOK_ASM1 || tok == TOK_ASM2 || tok == TOK_ASM3 || tok == TOK_ASM_CN)) {
                 ad.asm_label = asm_label_instr();
                 /* parse one last attribute list, after asm label */
                 parse_attribute(&ad);

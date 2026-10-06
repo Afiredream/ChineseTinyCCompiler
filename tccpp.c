@@ -933,11 +933,11 @@ redo_start:
                      tok == TOK_ELSE_CN))
                     goto the_end;
                 if (tok == TOK_IF || tok == TOK_IFDEF || tok == TOK_IFNDEF ||
-                    tok == TOK_IF_CN)
+                    tok == TOK_IF_CN || tok == TOK_IFDEF_CN || tok == TOK_IFNDEF_CN)
                     a++;
                 else if (tok == TOK_ENDIF)
                     a--;
-                else if( tok == TOK_ERROR || tok == TOK_WARNING)
+                else if( tok == TOK_ERROR || tok == TOK_ERROR_CN || tok == TOK_WARNING || tok == TOK_WARNING_CN)
                     in_warn_or_error = 1;
                 else if (tok == TOK_LINEFEED)
                     goto redo_start;
@@ -1451,7 +1451,7 @@ static int expr_preprocess(TCCState *s1)
             if (tok >= TOK_STR && tok <= TOK_CLDOUBLE)
                 tcc_error("invalid constant in preprocessor expression");
 
-        } else if (tok == TOK_DEFINED) {
+        } else if (tok == TOK_DEFINED || tok == TOK_DEFINED_CN) {
             parse_flags &= ~PARSE_FLAG_PREPROCESS; /* no macro subst */
             next();
             t = tok;
@@ -1526,7 +1526,7 @@ ST_FUNC void parse_define(void)
     TokenString str;
 
     v = tok;
-    if (v < TOK_IDENT || v == TOK_DEFINED)
+    if (v < TOK_IDENT || v == TOK_DEFINED || v == TOK_DEFINED_CN)
         tcc_error("invalid macro name '%s'", get_tok_str(tok, &tokc));
     first = NULL;
     t = MACRO_OBJ;
@@ -1832,6 +1832,7 @@ ST_FUNC void preprocess(int is_bof)
         parse_include(s1, tok - TOK_INCLUDE, 0);
         goto the_end;
     case TOK_IFNDEF:
+    case TOK_IFNDEF_CN:
         c = 1;
         goto do_ifdef;
     case TOK_IF:
@@ -1839,6 +1840,7 @@ ST_FUNC void preprocess(int is_bof)
         c = expr_preprocess(s1);
         goto do_if;
     case TOK_IFDEF:
+    case TOK_IFDEF_CN:
         c = 0;
     do_ifdef:
         next_nomacro();
@@ -1949,7 +1951,9 @@ ST_FUNC void preprocess(int is_bof)
         break;
 
     case TOK_ERROR:
+    case TOK_ERROR_CN:
     case TOK_WARNING:
+    case TOK_WARNING_CN:
     {
         q = buf;
         c = skip_spaces();
@@ -1959,7 +1963,7 @@ ST_FUNC void preprocess(int is_bof)
             c = ninp();
         }
         *q = '\0';
-        if (tok == TOK_ERROR)
+        if (tok == TOK_ERROR || tok == TOK_ERROR_CN)
             tcc_error("#error %s", buf);
         else
             tcc_warning("#warning %s", buf);
@@ -3460,7 +3464,7 @@ static int macro_subst(
             if (nosubst && t != '(')
                 nosubst = 0;
             /* GCC supports 'defined' as result of a macro substitution */
-            if (t == TOK_DEFINED && pp_expr)
+            if ((t == TOK_DEFINED || t == TOK_DEFINED_CN) && pp_expr)
                 nosubst = 1;
         }
     }
@@ -3863,7 +3867,7 @@ static void pp_debug_defines(TCCState *s1)
     fp = s1->ppfp;
     v = pp_debug_symv;
     vs = get_tok_str(v, NULL);
-    if (t == TOK_DEFINE) {
+    if (t == TOK_DEFINE || t == TOK_DEFINE_CN) {
         define_print(s1, v);
     } else if (t == TOK_UNDEF) {
         fprintf(fp, "#undef %s\n", vs);
