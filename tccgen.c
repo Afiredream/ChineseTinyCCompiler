@@ -7276,7 +7276,7 @@ again:
         a = gvtst(1, 0);
         skip(')');
         block(0);
-        if (tok == TOK_ELSE || t == TOK_ELSE_CN) {
+        if (tok == TOK_ELSE || tok == TOK_ELSE_CN) {
             d = gjmp(0);
             gsym(a);
             next();
