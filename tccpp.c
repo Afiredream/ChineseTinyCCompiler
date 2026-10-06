@@ -929,9 +929,11 @@ redo_start:
                 next_nomacro();
                 p = file->buf_ptr;
                 if (a == 0 && 
-                    (tok == TOK_ELSE || tok == TOK_ELIF || tok == TOK_ENDIF))
+                    (tok == TOK_ELSE || tok == TOK_ELIF || tok == TOK_ENDIF ||
+                     tok == TOK_ELSE_CN))
                     goto the_end;
-                if (tok == TOK_IF || tok == TOK_IFDEF || tok == TOK_IFNDEF)
+                if (tok == TOK_IF || tok == TOK_IFDEF || tok == TOK_IFNDEF ||
+                    tok == TOK_IF_CN)
                     a++;
                 else if (tok == TOK_ENDIF)
                     a--;
