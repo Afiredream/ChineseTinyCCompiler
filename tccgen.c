@@ -5200,11 +5200,11 @@ static int post_type(CType *type, AttributeDef *ad, int storage, int td)
 	       in parameter decls.  The '*' as well, and then even only
 	       in prototypes (not function defs).  */
 	    switch (tok) {
-	    case TOK_CONST1: case TOK_CONST2: case TOK_CONST3: case TOK_CONST_CN
+	    case TOK_CONST1: case TOK_CONST2: case TOK_CONST3: case TOK_CONST_CN:
 		array_qualifiers |= VT_CONSTANT;
 		next();
 		continue;
-	    case TOK_VOLATILE1: case TOK_VOLATILE2: case TOK_VOLATILE3: case TOK_VOLATILE_CN
+	    case TOK_VOLATILE1: case TOK_VOLATILE2: case TOK_VOLATILE3: case TOK_VOLATILE_CN:
 		array_qualifiers |= VT_VOLATILE;
 		next();
 		continue;
@@ -7415,13 +7415,27 @@ again:
         gsym(a);
         prev_scope(&o, 0);
 
-    } else if (t == TOK_DO || t == TOK_DO_CN) {
+    } else if (t == TOK_DO) {
         new_scope_s(&o);
         a = b = 0;
         d = gind();
         lblock(&a, &b);
         gsym(b);
         skip(TOK_WHILE);
+        skip('(');
+	gexpr();
+        c = gvtst(0, 0);
+        skip(')');
+        skip(';');
+	gsym_addr(c, d);
+        gsym(a);
+        prev_scope_s(&o);
+    } else if (t == TOK_DO_CN) {
+        new_scope_s(&o);
+        a = b = 0;
+        d = gind();
+        lblock(&a, &b);
+        gsym(b);
         skip(TOK_WHILE_CN);
         skip('(');
 	gexpr();
