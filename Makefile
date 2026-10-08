@@ -386,7 +386,7 @@ install-unx:
 	$(call IFw,tcc.1,"$(mandir)/man1")
 	$(call IFw,tcc-doc.info,"$(infodir)")
 	$(call IFw,tcc-doc.html,"$(docdir)")
-	install -m 755 tcc.sh "$(tccdir)/tcc"
+	install -m 755 tcc.sh "$(prefix)/tcc"
 ifneq "$(wildcard $(LIBTCC1_W))" ""
 	$(call IFw,$(TOPSRC)/win32/lib/*.def $(LIBTCC1_W),"$(tccdir)/win32/lib")
 	$(call IR,$(TOPSRC)/win32/include,"$(tccdir)/win32/include")
