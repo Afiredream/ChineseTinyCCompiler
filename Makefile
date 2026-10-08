@@ -377,7 +377,7 @@ EXTRA_O = runmain.o bt-exe.o bt-dll.o bt-log.o bcheck.o bcheck_run.o
 # install progs & libs
 install-unx:
 	$(call BINCHECK)
-	$(call IBw,tcc.sh,"$(tccdir)")
+	$(call IBw,tcc.sh,"$(bindir)")
 	$(call IBw,$(PROGS) *-tcc,"$(bindir)")
 	$(call IFw,$(LIBTCC1) $(EXTRA_O) $(LIBTCC1_U),"$(tccdir)")
 	$(call IF,$(TOPSRC)/include/*.h $(TOPSRC)/tcclib.h,"$(tccdir)/include")
@@ -386,7 +386,6 @@ install-unx:
 	$(call IFw,tcc.1,"$(mandir)/man1")
 	$(call IFw,tcc-doc.info,"$(infodir)")
 	$(call IFw,tcc-doc.html,"$(docdir)")
-	install -m 755 tcc.sh "$(DESTDIR)/tcc"
 ifneq "$(wildcard $(LIBTCC1_W))" ""
 	$(call IFw,$(TOPSRC)/win32/lib/*.def $(LIBTCC1_W),"$(tccdir)/win32/lib")
 	$(call IR,$(TOPSRC)/win32/include,"$(tccdir)/win32/include")
