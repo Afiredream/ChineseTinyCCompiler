@@ -377,8 +377,8 @@ EXTRA_O = runmain.o bt-exe.o bt-dll.o bt-log.o bcheck.o bcheck_run.o
 # install progs & libs
 install-unx:
 	$(call BINCHECK)
-	$(call IBw,tcc.sh,"$(bindir)")
-	$(call IBw,$(PROGS) *-tcc,"$(bindir)")
+	$(call IBw,bin/tcc,"$(bindir)")
+	$(call IBw,$(PROGS) *-tcc,"$(tccdir)")
 	$(call IFw,$(LIBTCC1) $(EXTRA_O) $(LIBTCC1_U),"$(tccdir)")
 	$(call IF,$(TOPSRC)/include/*.h $(TOPSRC)/tcclib.h,"$(tccdir)/include")
 	$(call $(if $(findstring .so,$(LIBTCC)),IBw,IFw),$(LIBTCC),"$(libdir)")
